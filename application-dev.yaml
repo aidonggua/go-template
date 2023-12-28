@@ -1,0 +1,3 @@
+server:
+  name: go_template_dev
+  port: 8088
