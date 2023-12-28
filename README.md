@@ -8,3 +8,4 @@ go项目模版,可以用作go web项目的初始化方案
 - [x] logrus
 - [x] redis
 - [x] mysql
+- [x] 根据profile读取不同的配置文件
