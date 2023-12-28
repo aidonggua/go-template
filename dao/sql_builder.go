@@ -12,7 +12,6 @@ type SqlBuilder[M any, F any] struct {
 	sort          string
 	offset        int
 	limit         int
-	dmlType       string
 	rowsAffected  int64
 	sessionEnable bool
 }
@@ -113,10 +112,6 @@ func (s *SqlBuilder[M, F]) Order(order string) *SqlBuilder[M, F] {
 }
 
 func (s *SqlBuilder[M, F]) One() *M {
-	s.checkSession()
-
-	s.dmlType = "select"
-
 	var t []M
 	tx := s.tx.Find(&t)
 	if tx.Error != nil {
@@ -130,10 +125,6 @@ func (s *SqlBuilder[M, F]) One() *M {
 }
 
 func (s *SqlBuilder[M, F]) List() []*M {
-	s.checkSession()
-
-	s.dmlType = "select"
-
 	var t []*M
 	tx := s.tx.Find(&t)
 	if tx.Error != nil {
@@ -144,10 +135,6 @@ func (s *SqlBuilder[M, F]) List() []*M {
 }
 
 func (s *SqlBuilder[M, F]) Delete() int64 {
-	s.checkSession()
-
-	s.dmlType = "delete"
-
 	if len(s.conditions) == 0 {
 		panic("需要删除条件")
 	}
@@ -162,10 +149,6 @@ func (s *SqlBuilder[M, F]) Delete() int64 {
 }
 
 func (s *SqlBuilder[M, F]) Count() int64 {
-	s.checkSession()
-
-	s.dmlType = "select"
-
 	var count int64
 	var model M
 	tx := s.tx.Model(model).Count(&count)
@@ -177,10 +160,6 @@ func (s *SqlBuilder[M, F]) Count() int64 {
 }
 
 func (s *SqlBuilder[M, F]) UpdateField(field string, value any) int64 {
-	s.checkSession()
-
-	s.dmlType = "update"
-
 	if len(s.conditions) == 0 {
 		panic("需要更新条件")
 	}
@@ -195,10 +174,6 @@ func (s *SqlBuilder[M, F]) UpdateField(field string, value any) int64 {
 }
 
 func (s *SqlBuilder[M, F]) UpdateModel(m M) int64 {
-	s.checkSession()
-
-	s.dmlType = "update"
-
 	if len(s.conditions) == 0 {
 		panic("需要更新条件")
 	}
@@ -213,10 +188,6 @@ func (s *SqlBuilder[M, F]) UpdateModel(m M) int64 {
 }
 
 func (s *SqlBuilder[M, F]) UpdateFields(m map[string]any) int64 {
-	s.checkSession()
-
-	s.dmlType = "update"
-
 	if len(s.conditions) == 0 {
 		panic("需要更新条件")
 	}
@@ -258,12 +229,4 @@ func (s *SqlBuilder[M, F]) checkListParam(value any) {
 	if invalid {
 		panic(fmt.Sprintf("字段类型异常: %T", value))
 	}
-}
-
-func (s *SqlBuilder[M, F]) checkSession() {
-	if s.sessionEnable {
-		s.sessionEnable = false
-		return
-	}
-	panic("db session not safe")
 }
